@@ -1,0 +1,13 @@
+{
+  "name": "tier-one-network-ops",
+  "version": "1.0.0",
+  "description": "Tier One: Network Operations. A network admin and security game with Cisco IOS-style commands.",
+  "author": "Yaseen.S",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "node serve.js",
+    "build": "node build.js",
+    "test": "node test/test.js && node test/test_v2.js"
+  }
+}

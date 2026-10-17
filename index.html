@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="author" content="Yaseen.S">
+<meta name="description" content="Tier One: Network Operations. Cable it, configure it with Cisco IOS-style commands, and keep the hackers out.">
+<title>Tier One: Network Operations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="menu" class="menu"></div>
+
+<div id="app" hidden>
+  <header id="top">
+    <div class="brand">TIER<span>ONE</span></div>
+    <div class="clockbox"><span id="day">Day 1</span><b id="clock">09:00</b><span id="modeTag" class="tag">Normal</span></div>
+    <div class="speed" role="group" aria-label="Game speed">
+      <button id="pauseBtn" class="sp" title="Pause (Space)">❚❚</button>
+      <button class="sp" data-speed="1" title="Normal speed (1)">▶</button>
+      <button class="sp" data-speed="2" title="Fast (2)">▶▶</button>
+      <button class="sp" data-speed="3" title="Faster (3)">▶▶▶</button>
+    </div>
+    <button id="hintBtn" class="sp hintbtn" title="What should I do next? (H)">Hint</button>
+    <div id="streak" class="streak" hidden></div>
+    <div class="stat"><span>Budget</span><b id="money">$0</b></div>
+    <div class="stat"><span>Reputation <em id="repTxt"></em></span><div class="meter"><i id="repBar"></i></div></div>
+    <div class="stat"><span id="lvl">Helpdesk Trainee</span><div class="meter xp"><i id="xpBar"></i></div></div>
+    <div class="stat"><span>Threat <em id="threatTxt"></em></span><div class="meter threat"><i id="threatBar"></i></div></div>
+    <button id="menuBtn" class="sp" title="Menu" aria-label="Menu">☰</button>
+  </header>
+
+  <nav id="tabs">
+    <button data-view="office" class="on">Office</button>
+    <button data-view="rack">Server room</button>
+    <button data-view="security">Security <span id="secBadge" class="badge" hidden></span></button>
+    <button data-view="people">People</button>
+    <button data-view="shop">Shop</button>
+    <button id="conBtn" class="con-btn">Console <kbd>`</kbd></button>
+  </nav>
+
+  <div id="crisis" class="crisis"></div>
+
+  <main id="main">
+    <section id="views">
+      <div id="v-office" class="view"><canvas id="officeCanvas" aria-label="Office floor"></canvas></div>
+      <div id="v-rack" class="view" hidden></div>
+      <div id="v-security" class="view scroll" hidden></div>
+      <div id="v-people" class="view scroll" hidden></div>
+      <div id="v-shop" class="view scroll" hidden></div>
+    </section>
+    <aside id="side">
+      <div id="sideTabs">
+        <button data-side="tickets" class="on">Tickets <span id="tkBadge" class="badge" hidden></span></button>
+        <button data-side="projects">Projects <span id="pjBadge" class="badge" hidden></span></button>
+        <button data-side="chat">Chat <span id="chBadge" class="badge" hidden></span></button>
+        <button data-side="log">Log</button>
+      </div>
+      <div id="sideBody"></div>
+    </aside>
+  </main>
+
+  <section id="console" aria-label="Device console">
+    <div class="con-head"><div id="conTabs"></div><button id="conClose" class="icon" aria-label="Close console">×</button></div>
+    <pre id="conOut"></pre>
+    <div class="con-in"><label id="conPrompt" for="conInput">R1&gt;</label><input id="conInput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Command"></div>
+  </section>
+
+  <div id="tutorial" class="tutorial" hidden></div>
+  <div id="banner" class="banner" aria-live="polite"></div>
+  <div id="stamp" class="stamp" aria-hidden="true"></div>
+</div>
+
+<div id="modal" hidden></div>
+<div id="toasts" aria-live="polite"></div>
+
+<script src="js/net.js"></script>
+<script src="js/cli.js"></script>
+<script src="js/data.js"></script>
+<script src="js/tutorial.js"></script>
+<script src="js/game.js"></script>
+<script src="js/hints.js"></script>
+<script src="js/live.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/office.js"></script>
+<script src="js/rack.js"></script>
+<script src="js/ui.js"></script>
+<script>TO.UI.start();</script>
+</body>
+</html>
