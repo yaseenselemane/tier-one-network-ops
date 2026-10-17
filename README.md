@@ -4,7 +4,13 @@ A network admin and cyber-defence game for the browser. You are the only IT pers
 cable the rack, configure the router and switches with real Cisco IOS-style commands, fix whatever breaks,
 and keep attackers out.
 
+**▶ Play it now: https://tier-one.pages.dev** (works on desktop, tablet and phone, nothing to install)
+
 Created by Yaseen.S
+
+Built with plain HTML, CSS and JavaScript. No frameworks, no dependencies, no build tools needed to play. It
+includes a small network simulator (VLANs, DHCP, NAT, ACLs, port security), an IOS-style command line, three
+difficulty modes with lessons and hints, crisis days, a daily challenge and a hacker villain.
 
 ## Run it
 
