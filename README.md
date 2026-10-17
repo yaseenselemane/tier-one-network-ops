@@ -53,6 +53,13 @@ and `js/` are needed.
 - **Projects** (VLANs, guest Wi-Fi, port security, backups, server ACLs) pay XP and money. XP unlocks gear in the Shop.
 - The game never ends on its own: the company keeps hiring, things keep breaking, and attackers keep escalating.
 
+### On a phone or tablet
+
+The layout adapts to small screens: tickets, projects and chat live in a bottom sheet you tap open, the office map
+pans sideways, and the console has a quick-key row (Tab, ?, up arrow, enable, conf t, exit, end, show run, and more).
+To cable the rack with a finger, tap one port and then the port at the other end (or drag). Swipe the rack sideways
+to reach more ports.
+
 ### Stuck? Hints everywhere
 
 Every kind of task has a **Hint** button: tickets, projects, security alerts, crisis days and lessons. The

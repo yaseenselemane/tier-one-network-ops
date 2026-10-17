@@ -41,7 +41,7 @@
     route_: '', binding: 'DHCP address bindings', 'access-lists': 'List access lists', translations: 'Translation entries', version: 'System hardware and software status',
     interfaces: 'Interface status and configuration', do: 'To run exec commands in config mode', permit: 'Specify packets to forward', deny: 'Specify packets to reject',
     protect: 'Security violation protect mode', restrict: 'Security violation restrict mode', nonegotiate: 'Device will not engage in negotiation protocol on this interface',
-    lease: 'Address lease time', history: 'Display the session command history', clear: 'Reset functions', logout: 'Exit from the EXEC',
+    lease: 'Address lease time', history: 'Display the session command history', hint: 'Show a hint about what to do next', clear: 'Reset functions', logout: 'Exit from the EXEC',
   };
 
   const SPECS = [];

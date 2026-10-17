@@ -39,7 +39,8 @@
 
   function addHot(kind, id, x, y, z, rw, rh, label) {
     const [sx, sy] = iso(x, y, z);
-    hot.push({ kind, id, x: sx - rw * sc / 2, y: sy - rh * sc, w: rw * sc, h: rh * sc, label });
+    const w = Math.max(rw * sc, 48), h = Math.max(rh * sc, 48); // fingers need at least ~48px targets
+    hot.push({ kind, id, x: sx - w / 2, y: sy - h, w, h, label });
   }
 
   function person(px, py, color, bob, skin) {
@@ -218,7 +219,8 @@
       }
       cx.fillStyle = '#f4f6f8'; cx.beginPath(); cx.ellipse(ax, ay, 16 * sc, 8 * sc, 0, 0, Math.PI * 2); cx.fill();
       cx.fillStyle = up ? '#43e08a' : '#ffb02e'; cx.beginPath(); cx.arc(ax, ay, 2.5 * sc, 0, Math.PI * 2); cx.fill();
-      hot.push({ kind: 'ap', id: 'AP1', x: ax - 20 * sc, y: ay - 12 * sc, w: 40 * sc, h: 24 * sc, label: 'Access point AP1 (click to configure)' });
+      const aw = Math.max(40 * sc, 48), ah = Math.max(24 * sc, 48);
+      hot.push({ kind: 'ap', id: 'AP1', x: ax - aw / 2, y: ay - ah / 2, w: aw, h: ah, label: 'Access point AP1 (click to configure)' });
     }
 
     // time of day light

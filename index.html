@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#0a1216">
 <meta name="author" content="Yaseen.S">
 <meta name="description" content="Tier One: Network Operations. Cable it, configure it with Cisco IOS-style commands, and keep the hackers out.">
 <title>Tier One: Network Operations</title>
@@ -28,7 +29,7 @@
     <div id="streak" class="streak" hidden></div>
     <div class="stat"><span>Budget</span><b id="money">$0</b></div>
     <div class="stat"><span>Reputation <em id="repTxt"></em></span><div class="meter"><i id="repBar"></i></div></div>
-    <div class="stat"><span id="lvl">Helpdesk Trainee</span><div class="meter xp"><i id="xpBar"></i></div></div>
+    <div class="stat xp-stat"><span id="lvl">Helpdesk Trainee</span><div class="meter xp"><i id="xpBar"></i></div></div>
     <div class="stat"><span>Threat <em id="threatTxt"></em></span><div class="meter threat"><i id="threatBar"></i></div></div>
     <button id="menuBtn" class="sp" title="Menu" aria-label="Menu">☰</button>
   </header>
@@ -66,6 +67,13 @@
   <section id="console" aria-label="Device console">
     <div class="con-head"><div id="conTabs"></div><button id="conClose" class="icon" aria-label="Close console">×</button></div>
     <pre id="conOut"></pre>
+    <div id="conKeys" class="con-keys" aria-label="Quick keys">
+      <button type="button" data-ckey="Tab">Tab</button><button type="button" data-ckey="?">?</button><button type="button" data-ckey="up">&uarr;</button>
+      <button type="button" data-ckey="cmd:enable">enable</button><button type="button" data-ckey="cmd:configure terminal">conf t</button>
+      <button type="button" data-ckey="cmd:exit">exit</button><button type="button" data-ckey="cmd:end">end</button>
+      <button type="button" data-ckey="cmd:show running-config">show run</button><button type="button" data-ckey="cmd:show ip interface brief">sh ip int br</button>
+      <button type="button" data-ckey="cmd:write memory">write mem</button><button type="button" data-ckey="clear">clear</button>
+    </div>
     <div class="con-in"><label id="conPrompt" for="conInput">R1&gt;</label><input id="conInput" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Command"></div>
   </section>
 
