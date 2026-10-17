@@ -4,7 +4,7 @@
   const NS = 'http://www.w3.org/2000/svg';
   const COLORS = ['#4aa3ff', '#ffd23f', '#3ddc84', '#ff5d73', '#b48cff', '#ff9f43'];
   const ROWS = [['ISP', 46], ['R1', 58], ['PP1', 66], ['SW1', 62], ['SW2', 96], ['SRV1', 72], ['NAS1', 54]];
-  let root, svg, info, handlers = {}, pos = {}, drag = null, selected = null;
+  let root, svg, info, handlers = {}, pos = {}, drag = null, selected = null, pending = null;
   const reduced = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -54,7 +54,8 @@
           const n = +p, who = S.staff.find(s => s.present && s.desk === n);
           sub = n === 16 ? 'PRN' : n === 17 ? 'AP' : who ? who.name.split(' ')[0].slice(0, 5) : '';
         }
-        body += `<g class="port${selected === k ? ' sel' : ''}" data-port="${k}">
+        body += `<g class="port${selected === k ? ' sel' : ''}${pending === k ? ' pend' : ''}" data-port="${k}">
+          <rect class="hit" x="${px - 2}" y="${py - 8}" width="28" height="48" fill="transparent"/>
           <rect x="${px}" y="${py}" width="24" height="18" rx="2" class="jack ${linked ? 'used' : ''}"/>
           <rect x="${px + 6}" y="${py + 4}" width="12" height="9" class="hole"/>
           <circle cx="${px + 20}" cy="${py - 4}" r="2.6" class="led st-${st}"/>
@@ -91,7 +92,8 @@
 
   function renderInfo() {
     const S = TO.Game.state(), net = TO.Game.net();
-    if (!selected) { info.innerHTML = '<h3>Patch cables</h3><p>Drag from one port to another to connect a cable. Click a port or cable to see where it goes. Click a device name to open its console or settings.</p><p class="muted">LEDs: <span class="dot st-up"></span>link up <span class="dot st-down"></span>no link <span class="dot st-disabled"></span>shut down <span class="dot st-err"></span>err-disabled <span class="dot st-faulty"></span>faulty</p>'; return; }
+    if (pending) { info.innerHTML = `<h3>Connecting ${esc(pending.replace(':', ' '))}</h3><p>Now tap the port at the other end of the cable. Tap ${esc(pending.replace(':', ' '))} again to cancel.</p><div class="row"><button class="btn" data-act="cancel">Cancel</button></div>`; return; }
+    if (!selected) { info.innerHTML = '<h3>Patch cables</h3><p>Drag from one port to another to connect a cable, or tap one port and then the other. On a phone, swipe the rack sideways to reach more ports. Tap a port or cable to see where it goes. Click a device name to open its console or settings.</p><p class="muted">LEDs: <span class="dot st-up"></span>link up <span class="dot st-down"></span>no link <span class="dot st-disabled"></span>shut down <span class="dot st-err"></span>err-disabled <span class="dot st-faulty"></span>faulty</p>'; return; }
     const k = selected, [id, p] = [k.slice(0, k.indexOf(':')), k.slice(k.indexOf(':') + 1)];
     const d = S.devices[id];
     const other = net.linkOf[k];
@@ -133,24 +135,34 @@
       root = container; handlers = hs;
       root.innerHTML = '<div class="rack-wrap"><svg class="rack" role="img" aria-label="Server rack"></svg></div><aside class="rack-info panel"></aside>';
       svg = root.querySelector('svg'); info = root.querySelector('.rack-info');
+      // Two ways to cable: drag from one port to another, or (touch-friendly) tap a free port, then tap the other end.
       svg.addEventListener('pointerdown', e => {
         const g = e.target.closest('.port');
         const cab = e.target.closest('.cable');
         if (g) {
           const k = g.dataset.port;
+          if (pending && pending !== k) {
+            const err = TO.Game.link(pending, k);
+            if (err) handlers.toast(err, 'bad'); else selected = k;
+            pending = null; drag = null; build();
+            e.preventDefault();
+            return;
+          }
           selected = k;
           if (!TO.Game.portLinked(k)) {
-            drag = { from: k };
-            svg.setPointerCapture(e.pointerId);
+            drag = { from: k, x: e.clientX, y: e.clientY, moved: false };
+            try { svg.setPointerCapture(e.pointerId); } catch (err) { /* no active pointer: keep going */ }
             TO.Audio.play('step');
           }
           build(); renderInfo();
           e.preventDefault();
-        } else if (cab) { selected = cab.dataset.a; drag = null; build(); }
-        else { const dv = e.target.closest('.dev'); if (dv && handlers.device) handlers.device(dv.dataset.dev); }
+        } else if (cab) { selected = cab.dataset.a; drag = null; pending = null; build(); }
+        else { pending = null; const dv = e.target.closest('.dev'); if (dv && handlers.device) handlers.device(dv.dataset.dev); else build(); }
       });
       svg.addEventListener('pointermove', e => {
         if (!drag) return;
+        if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 8) drag.moved = true;
+        if (!drag.moved) return;
         const a = pos[drag.from], b = svgPoint(e);
         svg.querySelector('#dragline').setAttribute('d', `M${a.x},${a.y} C${a.x},${a.y + 40} ${b.x},${b.y + 40} ${b.x},${b.y}`);
         svg.querySelectorAll('.port.hover').forEach(x => x.classList.remove('hover'));
@@ -160,8 +172,9 @@
       });
       const end = e => {
         if (!drag) return;
-        const from = drag.from;
+        const from = drag.from, moved = drag.moved;
         drag = null;
+        if (!moved) { pending = pending === from ? null : from; build(); return; } // a tap: arm (or cancel) tap-to-connect
         const over = document.elementFromPoint(e.clientX, e.clientY);
         const g = over && over.closest && over.closest('.port');
         if (g && g.dataset.port !== from) {
@@ -174,6 +187,7 @@
       svg.addEventListener('pointercancel', () => { drag = null; build(); });
       info.addEventListener('click', e => {
         const b = e.target.closest('[data-act]');
+        if (b && b.dataset.act === 'cancel') { pending = null; build(); return; }
         if (!b || !selected) return;
         const id = selected.slice(0, selected.indexOf(':'));
         if (b.dataset.act === 'unplug') { TO.Game.unlink(selected); build(); }

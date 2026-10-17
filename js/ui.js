@@ -52,19 +52,32 @@
     out.scrollTop = out.scrollHeight;
     $('#conPrompt').textContent = CLI.prompt(sessions[id]);
   }
+  function conSubmit(text) {
+    const S = G.state(), id = S.ui.consoleDev, s = session(id), inp = $('#conInput');
+    const line = text == null ? inp.value : text;
+    conWrite(id, CLI.prompt(s) + line);
+    if (line.trim()) { s.hist.push(line); s.hi = s.hist.length; }
+    const out = CLI.exec(s, line);
+    if (out) conWrite(id, out);
+    if (/% (Invalid|Incomplete|Ambiguous|Unknown)/.test(out)) A.play('error');
+    inp.value = '';
+    G.refresh();
+    renderConsole();
+  }
+  function conQuickKey(k) {
+    const S = G.state(), id = S.ui.consoleDev, s = session(id), inp = $('#conInput');
+    if (k === 'Tab') inp.value = CLI.complete(s, inp.value);
+    else if (k === '?') { conWrite(id, CLI.prompt(s) + inp.value + '?'); conWrite(id, CLI.help(s, inp.value)); renderConsole(); }
+    else if (k === 'up') { if (s.hi > 0) inp.value = s.hist[--s.hi]; }
+    else if (k === 'clear') transcripts[id] = [];
+    else if (k.startsWith('cmd:')) conSubmit(k.slice(4));
+    if (k === 'clear') renderConsole();
+  }
   function conKey(e) {
     const S = G.state(), id = S.ui.consoleDev, s = session(id), inp = e.target;
     if (e.key === 'Enter') {
       e.preventDefault();
-      const line = inp.value;
-      conWrite(id, CLI.prompt(s) + line);
-      if (line.trim()) { s.hist.push(line); s.hi = s.hist.length; }
-      const out = CLI.exec(s, line);
-      if (out) conWrite(id, out);
-      if (/% (Invalid|Incomplete|Ambiguous|Unknown)/.test(out)) A.play('error');
-      inp.value = '';
-      G.refresh();
-      renderConsole();
+      conSubmit();
     } else if (e.key === 'Tab') {
       e.preventDefault();
       inp.value = CLI.complete(s, inp.value);
@@ -107,6 +120,8 @@
     document.querySelectorAll('#tabs [data-view]').forEach(b => b.classList.toggle('on', b.dataset.view === v));
     document.querySelectorAll('.view').forEach(el => { el.hidden = el.id !== 'v-' + v; });
     A.hum(v === 'rack');
+    if (v === 'office') { const o = $('#v-office'); if (o.scrollWidth > o.clientWidth) o.scrollLeft = (o.scrollWidth - o.clientWidth) / 2; }
+    if (v !== 'office' || !matchMedia('(max-width: 1000px)').matches) { /* keep the sheet state */ }
     if (v === 'security') S.alerts.forEach(a => { a.read = true; });
     dirty = true;
     G.refresh();
@@ -500,6 +515,7 @@
   function startGame(fn) {
     menuOpen = false;
     resetSessions();
+    document.body.classList.remove('side-open');
     hints.clear(); projHints.clear(); alertHints.clear();
     tutMin = false; showCmds = false; crisisHintOpen = false; lastCrisisHtml = '';
     $('#menu').hidden = true;
@@ -538,7 +554,14 @@
 
     document.addEventListener('pointerdown', () => A.unlock(), { once: true });
     $('#tabs').addEventListener('click', e => { const b = e.target.closest('[data-view]'); if (b) setView(b.dataset.view); });
-    $('#sideTabs').addEventListener('click', e => { const b = e.target.closest('[data-side]'); if (b) { sideTab = b.dataset.side; dirty = true; } });
+    $('#sideTabs').addEventListener('click', e => {
+      const b = e.target.closest('[data-side]');
+      if (!b) return;
+      const narrow = matchMedia('(max-width: 1000px)').matches, open = document.body.classList.contains('side-open');
+      if (narrow && open && sideTab === b.dataset.side) document.body.classList.remove('side-open');
+      else { sideTab = b.dataset.side; if (narrow) document.body.classList.add('side-open'); }
+      dirty = true;
+    });
     $('#top').addEventListener('click', e => {
       const sp = e.target.closest('[data-speed]');
       if (sp) { G.setSpeed(+sp.dataset.speed); A.play('step'); }
@@ -561,13 +584,14 @@
       renderConsole();
     });
     $('#conOut').addEventListener('click', () => $('#conInput').focus());
+    $('#conKeys').addEventListener('click', e => { const b = e.target.closest('[data-ckey]'); if (b) conQuickKey(b.dataset.ckey); });
 
     // delegated actions across the app
     document.addEventListener('click', e => {
       const t = e.target;
       const el = sel => t.closest(sel);
       let b;
-      if ((b = el('[data-locate]'))) { setView('office'); TO.Office.focusDesk(+b.dataset.locate); }
+      if ((b = el('[data-locate]'))) { document.body.classList.remove('side-open'); setView('office'); TO.Office.focusDesk(+b.dataset.locate); }
       else if ((b = el('[data-hint]'))) { const id = b.dataset.hint; if (hints.has(id)) hints.delete(id); else { hints.add(id); const c = G.useHint('t:' + id); if (c) toast(`Vendor fee: -$${c}`); } dirty = true; }
       else if ((b = el('[data-phint]'))) { const k = b.dataset.phint; if (projHints.has(k)) projHints.delete(k); else { projHints.add(k); const c = G.useHint('p:' + k); if (c) toast(`Vendor fee: -$${c}`); } dirty = true; }
       else if ((b = el('[data-ahint]'))) { const k = b.dataset.ahint; if (alertHints.has(k)) alertHints.delete(k); else { alertHints.add(k); const c = G.useHint('a:' + k); if (c) toast(`Vendor fee: -$${c}`); } dirty = true; }
