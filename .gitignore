@@ -1,0 +1,8 @@
+node_modules/
+# build output: Cloudflare builds it from source with `npm run build`
+dist/
+dist.zip
+# local tooling and an unused early prototype
+.claude/
+tier-one.html
+.wrangler/
