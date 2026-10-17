@@ -22,6 +22,23 @@ Run the automated tests:
 npm test
 ```
 
+## Deploy (Cloudflare Pages)
+
+Live at https://tier-one.pages.dev. To publish an update:
+
+```bash
+npm run build
+```
+
+then, from any folder that is **not** this project (wrangler tries to auto-configure whatever folder it runs in):
+
+```bash
+npx wrangler pages deploy "<full path to this project>/dist" --project-name tier-one --branch main --commit-dirty=true
+```
+
+You need to be signed in once with `npx wrangler login`. Anything static works as a host: only `index.html`, `css/`
+and `js/` are needed.
+
 ## How it plays
 
 - **Server room**: drag patch cables between ports. Desks reach the rack through the patch panel (PP1).
