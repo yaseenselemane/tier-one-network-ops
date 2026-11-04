@@ -110,6 +110,30 @@ On Hard each hint costs $50, so use them wisely.
 `mac address-table`, `port-security`, `ip route`, `ip dhcp binding`, `ip dhcp pool`, `access-lists`,
 `ip nat translations`, `version`, `history`.
 
+## What building this taught me about networking
+
+Writing a simulator is a harsh teacher: every rule a real network follows had to be written down as code, or the game got it wrong.
+
+**1. A network is layers, and each one answers a different question.** The simulator works out who can reach whom in the same order a real network does. First the cable: is the link up? Then layer 2: which ports share a broadcast domain? Then layer 3: is there a route? Then the filters: does an ACL allow it? When a ticket says "can't reach the server", the fix is at whichever layer fails first.
+
+**2. VLANs split one switch into several.** A VLAN is a broadcast domain, so access ports in different VLANs can't see each other even on the same switch. Trunks carry several VLANs between switches with 802.1Q tags, and the allowed-VLAN list and native VLAN have to match at both ends. Traffic between VLANs needs a router: router-on-a-stick with `encapsulation dot1Q` subinterfaces.
+
+**3. DHCP only works where its pool lives.** A router pool hands out addresses only on the segment whose interface address falls inside the pool's network. Excluded addresses keep the gateway and servers out of the pool, and `default-router` must point at the real gateway, or clients get an IP but no way out.
+
+**4. NAT overload and inside versus outside.** Many private addresses share one public address through port address translation. It only works when the interfaces are marked `ip nat inside` and `ip nat outside` correctly and the ACL matches the inside network.
+
+**5. ACL order matters, and there's an invisible deny at the end.** ACLs are read top to bottom and the first match wins. An ACL that permits nothing blocks everything after it. Standard ACLs filter on source only, so they belong close to the destination. Extended ACLs can match protocol and port, so they belong close to the source.
+
+**6. Port security is layer 2 defence.** Limiting MAC addresses per port and choosing a violation mode (shutdown, restrict, protect) stops a rogue device someone plugs into a desk jack. Shutdown err-disables the port until an admin re-enables it.
+
+**7. Running config is not startup config.** Changes live in RAM until `write memory` or `copy running-config startup-config`. A reload throws away anything unsaved, which the game punishes on purpose.
+
+**8. Most outages are physical or human.** A pulled patch cable, a port left `shutdown` or a VLAN typo cause more tickets than attackers do. And the most effective "attack" is a polite request: social engineering beats firewalls.
+
+**9. Security is contain, clean, recover, then close the gap.** Isolating an infected PC stops the spread, but the incident is only over once the hole it used (open guest Wi-Fi, an unsecured port, no ACL) is fixed.
+
+**10. Cisco IOS habits.** Modes (user, privileged, config, interface), abbreviations (`conf t`, `sh ip int br`), `?` for help and `do` to run show commands from config mode. Building the CLI meant learning exactly how they behave.
+
 ## Project layout
 
 | File | What it does |
